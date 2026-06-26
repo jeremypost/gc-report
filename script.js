@@ -1,0 +1,8 @@
+const progress=document.getElementById('progress');
+const prefersReduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function setProgress(){const h=document.documentElement;progress.style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight))*100+'%'}
+window.addEventListener('scroll',setProgress,{passive:true});setProgress();
+function animateCounter(el){if(el.dataset.done)return;el.dataset.done='1';const target=Number(el.dataset.target||0);if(prefersReduced){el.textContent=target;return}let start=null;const dur=1200+Math.min(target,100)*5;function step(ts){start??=ts;const p=Math.min((ts-start)/dur,1);const eased=1-Math.pow(1-p,3);el.textContent=Math.round(target*eased).toLocaleString();if(p<1)requestAnimationFrame(step)}requestAnimationFrame(step)}
+const io=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible','in-view');e.target.querySelectorAll?.('.counter').forEach(animateCounter);if(e.target.classList.contains('bar'))e.target.style.setProperty('--value',e.target.dataset.value);if(e.target.classList.contains('mini-hist'))e.target.querySelectorAll('div').forEach(d=>d.style.setProperty('--value',d.dataset.value));}})},{threshold:.22});
+document.querySelectorAll('.reveal,.bar,.mini-hist').forEach(el=>io.observe(el));
+if(!prefersReduced){window.addEventListener('scroll',()=>{const y=window.scrollY;document.querySelectorAll('[data-parallax]').forEach((el,i)=>{const r=el.getBoundingClientRect();if(r.bottom>0&&r.top<innerHeight){el.style.setProperty('--py',`${(r.top-innerHeight/2)*-0.045}px`);el.querySelectorAll('.shape').forEach((s,j)=>s.style.transform=`translate3d(0,${(y*(.05+j*.03))%220}px,0)`);}})},{passive:true})}
